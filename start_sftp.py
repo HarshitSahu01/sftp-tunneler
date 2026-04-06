@@ -28,8 +28,9 @@ def create_user(username, password):
         subprocess.run(f"id {username}", shell=True, check=True, stdout=subprocess.DEVNULL)
         print("[+] User already exists")
     except:
-        run(f"useradd -m {username}")
-    
+        # If the group already exists (e.g., 'admin' group), fallback to using it
+        run(f"useradd -m {username} || useradd -m -g {username} {username}")
+
     print("[*] Setting password...")
     run(f'echo "{username}:{password}" | chpasswd')
 
@@ -79,6 +80,50 @@ def start_pinggy():
 
     return proc, host, port
 
+import threading
+from collections import defaultdict
+
+FAILED_ATTEMPTS = defaultdict(int)
+
+def monitor_auth():
+    log_file = "/var/log/auth.log"
+    print("[*] Starting SSH monitoring...")
+
+    try:
+        with open(log_file, "r") as f:
+            f.seek(0, 2)  # move to end
+
+            while True:
+                line = f.readline()
+                if not line:
+                    time.sleep(0.5)
+                    continue
+
+                # SUCCESS login
+                if "Accepted password for" in line:
+                    ip_match = re.search(r"from ([0-9\.]+)", line)
+                    user_match = re.search(r"for (\w+)", line)
+
+                    if ip_match and user_match:
+                        ip = ip_match.group(1)
+                        user = user_match.group(1)
+                        print(f"[SUCCESS] User: {user} IP: {ip}")
+
+                # FAILED login
+                if "Failed password for" in line:
+                    ip_match = re.search(r"from ([0-9\.]+)", line)
+                    if ip_match:
+                        ip = ip_match.group(1)
+                        FAILED_ATTEMPTS[ip] += 1
+                        print(f"[FAILED] IP: {ip} Attempts: {FAILED_ATTEMPTS[ip]}")
+
+                        if FAILED_ATTEMPTS[ip] >= 3:
+                            print(f"[BLOCKING] {ip}")
+                            run(f"iptables -A INPUT -s {ip} -j DROP", check=False)
+
+    except Exception as e:
+        print(f"[ERROR] Monitoring failed: {e}")           
+
 # -------- MAIN --------
 def main():
     if os.geteuid() != 0:
@@ -115,6 +160,9 @@ def main():
         sys.exit(0)
 
     signal.signal(signal.SIGINT, cleanup)
+    
+    monitor_thread = threading.Thread(target=monitor_auth, daemon=True)
+    monitor_thread.start()
 
     print("[*] Press Ctrl+C to stop")
     while True:
