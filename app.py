@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="SFTP Hub", page_icon="🔒", layout="wide")
+st.set_page_config(page_title="SFTP Hub", page_icon=None, layout="wide")
 
 # ================= STATE INIT =================
 if "app_mode" not in st.session_state:
@@ -32,7 +32,7 @@ from views.client_view import render_client
 # ================= ROUTING =================
 def main():
     if st.session_state.app_mode == "Landing":
-        st.title("Welcome to SFTP Hub 🚀")
+        st.title("Welcome to SFTP Hub")
         st.markdown("Your all-in-one suite for crafting secure tunnels and managing remote files.")
         st.divider()
         
@@ -46,18 +46,18 @@ def main():
                 is_cloud = False
                 
             if is_cloud:
-                st.markdown("### 🏠 Host Server (Disabled)")
+                st.markdown("### Host Server (Disabled)")
                 st.info("Host Mode is disabled in the Cloud version. Please run this app locally to host files.")
                 st.button("Start Hosting", use_container_width=True, type="primary", disabled=True)
             else:
-                st.markdown("### 🏠 Host Server")
+                st.markdown("### Host Server")
                 st.info("Start a local SFTP tunnel, generate secure endpoints, and manage active IP firewall rules.")
                 if st.button("Start Hosting", use_container_width=True, type="primary"):
                     st.session_state.app_mode = "Host"
                     st.rerun()
                 
         with c2:
-            st.markdown("### 🌐 Connect Client")
+            st.markdown("### Connect Client")
             st.info("Log into a friend's active tunnel remotely. Use the sleek GUI to upload and download files.")
             if st.button("Connect to Server", use_container_width=True, type="primary"):
                 st.session_state.app_mode = "Client"

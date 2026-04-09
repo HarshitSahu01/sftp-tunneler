@@ -27,7 +27,7 @@ def render_security_tab():
         pass
 
     # Global Mode
-    st.markdown("**🛡️ Global Firewall Mode**")
+    st.markdown("**Global Firewall Mode**")
     mode_col1, mode_col2 = st.columns([3, 1])
     with mode_col1:
         new_mode = st.radio("Select how the server handles incoming connections:", 
@@ -55,7 +55,7 @@ def render_security_tab():
     w_col, b_col = st.columns(2)
     
     with w_col:
-        st.markdown("### 🟢 Whitelist")
+        st.markdown("### Whitelist")
         st.caption("IPs inherently trusted by the system.")
         wl_raw = st.text_input("Add to Whitelist:", key="wl_in", placeholder="e.g. 192.168.1.5", label_visibility="collapsed")
         if st.button("Add to Whitelist", key="btn_wl", use_container_width=True):
@@ -77,7 +77,7 @@ def render_security_tab():
                 st.rerun()
 
     with b_col:
-        st.markdown("### 🔴 Blacklist")
+        st.markdown("### Blacklist")
         st.caption("IPs permanently banished from tunneling.")
         bl_raw = st.text_input("Add to Blacklist:", key="bl_in", placeholder="e.g. 10.0.0.5", label_visibility="collapsed")
         if st.button("Add to Blacklist", key="btn_bl", use_container_width=True):
@@ -99,7 +99,7 @@ def render_security_tab():
                 st.rerun()
                 
     st.divider()
-    st.markdown("**🔐 Authentication Ledger**")
+    st.markdown("**Authentication Ledger**")
     st.caption("A clean audit log of who tried to access the tunnel.")
     
     auth_events = []

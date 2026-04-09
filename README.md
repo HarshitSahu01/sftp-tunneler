@@ -1,68 +1,139 @@
-# 🚀 SFTP Tunneler
+# SFTP Tunneler
 
-A lightweight, automated SSH/SFTP server and tunneling utility designed to expose local directories to the web with zero-config overhead.
+A Streamlit-based SFTP toolkit for both hosting and connecting to tunneled SFTP servers.
 
-Currently powered by **Pinggy**, this tool simplifies the deployment of an SFTP server on Linux environments, handling user management, service configuration, and secure tunneling in a single automated flow.
-
----
-
-## 🛠️ Features
-
-- **One-Command Setup**: Installs and configures `sshd` automatically.
-- **Dynamic User Management**: Creates temporary or persistent SFTP users with custom credentials.
-- **Secure Tunneling**: Zero-config reverse SSH tunneling via Pinggy (`tcp://...`).
-- **Interactive Console**: Real-time display of connection details and SFTP access commands.
-- **Clean Exit**: Automatically cleans up SSH services and tunnels on termination.
+The project currently uses **Pinggy** for reverse SSH tunneling and includes:
+- A **Host mode** to create and expose a local SFTP server.
+- A **Client mode** to connect to a remote SFTP tunnel from the browser.
+- Built-in security tooling (whitelist/blacklist/global mode/auth log monitoring).
 
 ---
 
-## 🚦 Quick Start
+## Features
+
+- **Dual App Modes**: Landing page routes into Host or Client workflows.
+- **Host Tunnel Automation**: Installs/configures `openssh-server`, creates user credentials, and starts the Pinggy tunnel.
+- **Live Connection Details**: Shows host, port, username, password, and generated `sftp -P <port> <user>@<host>` command.
+- **Host File Operations**: Upload/download files directly against `/home/<username>/`.
+- **Client File Browser**: Connect to a remote SFTP endpoint via Paramiko, then upload/download from a browser session.
+- **Firewall Controls**: Default vs strict whitelist mode for port `2222`, plus IP whitelist/blacklist management.
+- **Auth Event Ledger**: Displays successful, failed, and blocked authentication events from live tunnel logs.
+- **Auto Blocking**: Repeated failed auth attempts are auto-blocked via `iptables` (after 3 failed attempts).
+- **Cloud-Aware UI Behavior**: Host mode can be disabled in cloud deploys via `CLOUD_DEPLOYMENT` secret.
+
+---
+
+## Quick Start
 
 ### Prerequisites
-- **OS**: Linux (Debian/Ubuntu recommended)
-- **Permissions**: Root access (`sudo`)
+- **OS**: Linux (Debian/Ubuntu recommended for host mode)
 - **Python**: 3.8+
+- **Privileges for Host Mode**: Root/sudo is required for `sshd`, `systemctl`, and `iptables` operations.
 
-### Installation & Usage
+### Installation
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/HarshitSahu01/sftp-tunneler
    cd sftp-tunneler
    ```
 
-2. **Run the tunneler**:
+2. **Install Python dependencies**:
    ```bash
-   sudo python3 start_sftp.py <username> <password>
+   pip install -r requirements.txt
    ```
 
-3. **Profit**:
-   The script will output the public URL and the command to connect from any remote machine:
-   ```bash
-   sftp -P <port> <username>@<host>
-   ```
+### Run the Streamlit App (Recommended)
+```bash
+sudo streamlit run app.py
+```
+
+Why `sudo`: the Host workflow invokes system-level operations (`openssh-server`, `systemctl`, `iptables`) through `start_sftp.py`.
+
+### Run Script-Only Mode (No UI)
+If you only want the tunnel bootstrap script:
+
+```bash
+sudo python3 start_sftp.py <username> <password>
+```
+
+The script prints a public endpoint and SFTP command:
+
+```bash
+sftp -P <port> <username>@<host>
+```
 
 ---
 
-## 🚀 The Vision: Moving Beyond Pinggy
+## How It Works
 
-We are planning to evolve this tool into a full-featured, self-hosted **SFTP Relay Infrastructure**. This new architecture will eliminate dependencies on third-party tunnels and provide unparalleled control over your traffic.
+### Host Mode
+- Accepts username/password and launches `start_sftp.py`.
+- Parses live process logs to extract tunnel host/port.
+- Exposes three tabs:
+  - `Connection Details`
+  - `File Viewer`
+  - `Security & Access`
 
-### 🛡️ Custom Forwarding Utility (Future Roadmap)
-Our goal is to build a bespoke tunneling proxy that offers:
+### Client Mode
+- Uses Paramiko over SSH to open an SFTP session to a remote endpoint.
+- Supports browser-side upload/download for files in the active remote directory.
 
-- **Integrated Firewall**: Granular control over who can access your SFTP server based on IP or geolocation.
-- **Real-time Monitoring**: Visual dashboards to track active connections, bandwidth usage, and transfer logs.
-- **IP Management**: Dynamic whitelisting and blacklisting of remote clients.
-- **Centralized Orchestration**: A Render-based control plane to manage multiple tunnels from a single interface.
+### Security Layer
+- Reads and manages `iptables` INPUT rules.
+- Supports whitelist and blacklist CRUD from the UI.
+- Can enforce a strict whitelist model by appending a terminal drop rule on SFTP port `2222`.
+- Monitors `/var/log/auth.log` and blocks IPs after repeated failed attempts.
 
 ---
 
-## 🤝 Contributing
+## Configuration
 
-Contributions are welcome! Whether it's bug fixes, feature requests, or suggestions for the new architecture, please open an issue or submit a PR.
+- `CLOUD_DEPLOYMENT` (Streamlit secret): when set truthy, disables Host mode buttons in the landing page.
 
 ---
 
-## 📜 License
+## Dependencies
+
+- `streamlit`
+- `paramiko`
+
+---
+
+## Project Structure
+
+```text
+app.py                  # Streamlit entrypoint and routing
+start_sftp.py           # System bootstrap + Pinggy tunnel + auth monitoring
+views/host_view.py      # Host mode UI
+views/client_view.py    # Client mode UI
+modules/host_tunnel.py  # Host process lifecycle and log streaming
+modules/host_files.py   # Host file viewer/upload/download
+modules/host_security.py# Firewall and auth event UI
+modules/client_core.py  # Paramiko SSH/SFTP client workflow
+```
+
+---
+
+## Notes and Limitations
+
+- Host mode is intended for local/native execution with elevated permissions.
+- The tunnel backend is currently Pinggy.
+- Firewall and auth monitoring behavior depends on Linux tooling (`iptables`, `/var/log/auth.log`).
+
+---
+
+## Roadmap
+
+Long-term direction remains a custom forwarding and relay stack to reduce third-party tunnel dependency and add richer orchestration.
+
+---
+
+## Contributing
+
+Contributions are welcome. Open an issue or submit a PR with bug fixes, improvements, or roadmap proposals.
+
+---
+
+## License
 
 MIT License. See [LICENSE](LICENSE) for details.

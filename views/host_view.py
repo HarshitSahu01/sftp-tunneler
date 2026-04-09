@@ -9,7 +9,7 @@ def render_host():
         st.session_state.app_mode = "Landing"
         st.rerun()
 
-    st.title("🏠 SFTP Tunneler Host")
+    st.title("SFTP Tunneler Host")
     st.markdown("Host a secure SFTP tunnel from your machine.")
 
     with st.container():
@@ -38,7 +38,7 @@ def render_host():
 
     if st.session_state.process is not None:
         if st.session_state.process.poll() is None:
-            st.success("🟢 Tunnel is RUNNING")
+            st.success("Tunnel is RUNNING")
             
             if st.session_state.host and st.session_state.port:
                 tab1, tab2, tab3 = st.tabs(["Connection Details", "File Viewer", "Security & Access"])
@@ -61,8 +61,8 @@ def render_host():
                                 f"3. When prompted, enter the password: `{st.session_state.password}`")
                     
                     st.subheader("File Location Info")
-                    st.info(f"📁 **Remote Path:** Uploaded files will be stored in `/home/{st.session_state.username}/` on the server.")
-                    st.info("⬇️ **Local Path:** Downloaded files will be saved to whichever folder you ran the `sftp` terminal command from.")
+                    st.info(f"**Remote Path:** Uploaded files will be stored in `/home/{st.session_state.username}/` on the server.")
+                    st.info("**Local Path:** Downloaded files will be saved to whichever folder you ran the `sftp` terminal command from.")
                     
                     st.subheader("Basic Commands")
                     st.markdown("- `ls` → List files on the remote server\n"
@@ -80,15 +80,15 @@ def render_host():
                 time.sleep(1)
                 st.rerun()
         else:
-            st.error("🔴 Tunnel process has died.")
+            st.error("Tunnel process has died.")
             st.session_state.process = None
 
     else:
-        st.info("⚪ Tunnel is STOPPED.")
+        st.info("Tunnel is STOPPED.")
 
     st.divider()
     st.subheader("Live Logs")
-    if st.button("↻ Refresh Logs"):
+    if st.button("Refresh Logs"):
         st.rerun()
         
     if st.session_state.logs:

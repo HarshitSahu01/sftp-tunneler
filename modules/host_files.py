@@ -37,7 +37,7 @@ def render_file_viewer_tab():
     op_col1, op_col2 = st.columns(2)
     
     with op_col1:
-        st.markdown("**📤 Upload to Server**")
+        st.markdown("**Upload to Server**")
         uploaded_file = st.file_uploader("Choose a file to push via tunnel:", label_visibility="collapsed")
         if uploaded_file is not None:
             if st.button("Confirm Upload", type="primary"):
@@ -65,7 +65,7 @@ def render_file_viewer_tab():
                         st.error(f"Upload failed: {e}")
 
     with op_col2:
-        st.markdown("**📥 Download from Server**")
+        st.markdown("**Download from Server**")
         if not available_files:
             st.info("The root of the directory has no files to download yet.")
         else:

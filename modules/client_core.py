@@ -34,7 +34,7 @@ def render_file_browser(sftp):
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("**📤 Upload File**")
+        st.markdown("**Upload File**")
         uploaded_file = st.file_uploader("Upload to server", label_visibility="collapsed", key="cu")
         if uploaded_file:
             if st.button("Confirm Upload", type="secondary"):
@@ -49,7 +49,7 @@ def render_file_browser(sftp):
                         st.error(f"Upload failed: {e}")
                         
     with col2:
-        st.markdown("**📥 Download File**")
+        st.markdown("**Download File**")
         if not files_only:
             st.info("Directory is empty.")
         else:

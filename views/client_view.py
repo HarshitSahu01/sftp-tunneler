@@ -15,7 +15,7 @@ def render_client():
         st.session_state.client_ssh = None
         st.rerun()
     
-    st.title("🌐 SFTP Client Connect")
+    st.title("SFTP Client Connect")
     st.markdown("Connect securely to an external SFTP tunnel directly from your browser.")
 
     if st.session_state.client_sftp is None:
@@ -36,7 +36,7 @@ def render_client():
                 else:
                     st.error("Please fill in all connection fields.")
     else:
-        st.success("🟢 Connected successfully!")
+        st.success("Connected successfully!")
         if st.button("Disconnect", type="primary"):
             st.session_state.client_sftp.close()
             st.session_state.client_ssh.close()
