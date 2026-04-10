@@ -19,6 +19,10 @@ if "username" not in st.session_state:
     st.session_state.username = None
 if "password" not in st.session_state:
     st.session_state.password = None
+if "private_host" not in st.session_state:
+    st.session_state.private_host = None
+if "private_port" not in st.session_state:
+    st.session_state.private_port = "22"
 
 # Client Mode State
 if "client_sftp" not in st.session_state:

@@ -1,5 +1,8 @@
 import streamlit as st
 import time
+import json
+from urllib.parse import urlencode
+import streamlit.components.v1 as components
 from modules.host_tunnel import start_tunnel, stop_tunnel
 from modules.host_files import render_file_viewer_tab
 from modules.host_security import render_security_tab
@@ -50,14 +53,59 @@ def render_host():
                     st.markdown(f"**Username:** `{st.session_state.username}`")
                     st.markdown(f"**Password:** `{st.session_state.password}`")
                     
-                    st.markdown("**Full SFTP Command:**")
+                    private_host = st.session_state.private_host
+                    private_port = st.session_state.private_port or "22"
+                    if private_host:
+                        private_cmd = f"sftp -P {private_port} {st.session_state.username}@{private_host}"
+                        st.markdown("**Private SFTP Command (Local Network):**")
+                        st.code(private_cmd, language="bash")
+
+                    st.markdown("**Public SFTP Command (Pinggy):**")
                     sftp_cmd = f"sftp -P {st.session_state.port} {st.session_state.username}@{st.session_state.host}"
                     st.code(sftp_cmd, language="bash")
+
+                    st.divider()
+                    st.subheader("SFTP Web Client")
+                    filestash_url = "https://demo.filestash.app/login?" + urlencode(
+                        {
+                            "type": "sftp",
+                            "hostname": st.session_state.host,
+                            "username": st.session_state.username,
+                            "password": st.session_state.password,
+                            "port": st.session_state.port,
+                        }
+                    )
+
+                    st.link_button("Open SFTP Web Client", filestash_url, use_container_width=True)
+
+                    copy_btn_id = f"copy-filestash-{st.session_state.port}"
+                    copy_label_id = f"copy-label-{st.session_state.port}"
+                    copy_widget = f"""
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                        <button id="{copy_btn_id}" style="padding:8px 12px;border-radius:8px;border:1px solid #d1d5db;background:#ffffff;cursor:pointer;">📋 Copy Link</button>
+                        <span id="{copy_label_id}" style="font-size:0.9rem;color:#4b5563;"></span>
+                    </div>
+                    <script>
+                        const copyBtn = document.getElementById({json.dumps(copy_btn_id)});
+                        const copyLabel = document.getElementById({json.dumps(copy_label_id)});
+                        if (copyBtn) {{
+                            copyBtn.onclick = async () => {{
+                                try {{
+                                    await navigator.clipboard.writeText({json.dumps(filestash_url)});
+                                    if (copyLabel) copyLabel.textContent = "Copied";
+                                }} catch (err) {{
+                                    if (copyLabel) copyLabel.textContent = "Copy failed";
+                                }}
+                            }};
+                        }}
+                    </script>
+                    """
+                    components.html(copy_widget, height=52)
                     
                     st.divider()
                     st.subheader("How to Connect")
                     st.markdown(f"1. Open your local terminal/command prompt.\n"
-                                f"2. Run the SFTP command above.\n"
+                                f"2. Use the private command on your local network, or the public command from anywhere.\n"
                                 f"3. When prompted, enter the password: `{st.session_state.password}`")
                     
                     st.subheader("File Location Info")

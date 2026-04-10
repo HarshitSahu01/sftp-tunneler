@@ -4,6 +4,7 @@ import time
 import re
 import signal
 import os
+import socket
 
 # -------- CONFIG --------
 PINGGY_CMD = ["ssh", "-p", "443", "-R0:127.0.0.1:22", "-o", "StrictHostKeyChecking=no", "-T", "tcp@free.pinggy.io"]
@@ -80,6 +81,19 @@ def start_pinggy():
 
     return proc, host, port
 
+def get_private_ip():
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.connect(("8.8.8.8", 80))
+        ip = sock.getsockname()[0]
+        sock.close()
+        return ip
+    except Exception:
+        try:
+            return socket.gethostbyname(socket.gethostname())
+        except Exception:
+            return "127.0.0.1"
+
 import threading
 from collections import defaultdict
 
@@ -142,6 +156,9 @@ def main():
     start_ssh()
     ensure_config()
 
+    private_ip = get_private_ip()
+    private_port = "22"
+
     proc, host, port = start_pinggy()
 
     print("\n====== SFTP DETAILS ======")
@@ -149,7 +166,9 @@ def main():
     print(f"Port     : {port}")
     print(f"Username : {username}")
     print(f"Password : {password}")
-    print("\nSFTP CMD:")
+    print("\nPrivate SFTP CMD (Local Network):")
+    print(f"sftp -P {private_port} {username}@{private_ip}")
+    print("Public SFTP CMD (Pinggy):")
     print(f"sftp -P {port} {username}@{host}")
     print("=========================\n")
 
