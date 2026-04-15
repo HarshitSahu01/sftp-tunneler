@@ -4,7 +4,6 @@ from modules.client_core import connect_ssh, render_file_browser
 def render_client():
     if st.button("← Back to Home"):
         st.session_state.app_mode = "Landing"
-        # Close connection if leaving client page
         if st.session_state.client_sftp:
             try: st.session_state.client_sftp.close()
             except: pass

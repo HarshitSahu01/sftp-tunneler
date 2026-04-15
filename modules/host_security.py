@@ -8,7 +8,6 @@ def render_security_tab():
     
     wsl_pfx = ["wsl", "-u", "root"] if os.name == 'nt' else ["sudo", "-n"]
     
-    # Fetch active IP rules dynamically
     whitelisted = []
     blacklisted = []
     try:
@@ -26,7 +25,6 @@ def render_security_tab():
     except Exception:
         pass
 
-    # Global Mode
     st.markdown("**Global Firewall Mode**")
     mode_col1, mode_col2 = st.columns([3, 1])
     with mode_col1:
@@ -37,10 +35,8 @@ def render_security_tab():
         if st.button("Apply Mode", type="primary", use_container_width=True):
             with st.spinner("Modifying System Netfilter..."):
                 try:
-                    # Clear the master drop rule unconditionally to avoid duplicates
                     subprocess.run(wsl_pfx + ["iptables", "-D", "INPUT", "-p", "tcp", "--dport", "2222", "-j", "DROP"], stderr=subprocess.DEVNULL)
                     if "Whitelist" in new_mode:
-                        # Apply the master drop at the end of the chain securely
                         subprocess.run(wsl_pfx + ["iptables", "-A", "INPUT", "-p", "tcp", "--dport", "2222", "-j", "DROP"], check=True)
                         st.success("Strict Whitelist Mode applied!")
                     else:

@@ -2,11 +2,9 @@ import streamlit as st
 
 st.set_page_config(page_title="SFTP Hub", page_icon=None, layout="wide")
 
-# ================= STATE INIT =================
 if "app_mode" not in st.session_state:
     st.session_state.app_mode = "Landing"
 
-# Host Mode State
 if "process" not in st.session_state:
     st.session_state.process = None
 if "logs" not in st.session_state:
@@ -24,7 +22,6 @@ if "private_host" not in st.session_state:
 if "private_port" not in st.session_state:
     st.session_state.private_port = "22"
 
-# Client Mode State
 if "client_sftp" not in st.session_state:
     st.session_state.client_sftp = None
 if "client_ssh" not in st.session_state:
@@ -33,7 +30,6 @@ if "client_ssh" not in st.session_state:
 from views.host_view import render_host
 from views.client_view import render_client
 
-# ================= ROUTING =================
 def main():
     if st.session_state.app_mode == "Landing":
         st.title("Welcome to SFTP Hub")
@@ -42,8 +38,6 @@ def main():
         
         c1, c2 = st.columns(2)
         with c1:
-            # Check for cloud deployment to hide Host mode if deployed on web
-            # As discussed with Harshit, host mode is for local native use only
             try:
                 is_cloud = st.secrets.get("CLOUD_DEPLOYMENT", False)
             except Exception:

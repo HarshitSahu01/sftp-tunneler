@@ -6,10 +6,8 @@ import signal
 import os
 import socket
 
-# -------- CONFIG --------
 PINGGY_CMD = ["ssh", "-p", "443", "-R0:127.0.0.1:22", "-o", "StrictHostKeyChecking=no", "-T", "tcp@free.pinggy.io"]
 
-# -------- HELPERS --------
 def run(cmd, check=True):
     return subprocess.run(cmd, shell=True, check=check)
 
@@ -29,7 +27,6 @@ def create_user(username, password):
         subprocess.run(f"id {username}", shell=True, check=True, stdout=subprocess.DEVNULL)
         print("[+] User already exists")
     except:
-        # If the group already exists (e.g., 'admin' group), fallback to using it
         run(f"useradd -m {username} || useradd -m -g {username} {username}")
 
     print("[*] Setting password...")
@@ -105,7 +102,7 @@ def monitor_auth():
 
     try:
         with open(log_file, "r") as f:
-            f.seek(0, 2)  # move to end
+            f.seek(0, 2)  
 
             while True:
                 line = f.readline()
@@ -113,7 +110,6 @@ def monitor_auth():
                     time.sleep(0.5)
                     continue
 
-                # SUCCESS login
                 if "Accepted password for" in line:
                     ip_match = re.search(r"from ([0-9\.]+)", line)
                     user_match = re.search(r"for (\w+)", line)
@@ -123,7 +119,6 @@ def monitor_auth():
                         user = user_match.group(1)
                         print(f"[SUCCESS] User: {user} IP: {ip}")
 
-                # FAILED login
                 if "Failed password for" in line:
                     ip_match = re.search(r"from ([0-9\.]+)", line)
                     if ip_match:
@@ -138,7 +133,6 @@ def monitor_auth():
     except Exception as e:
         print(f"[ERROR] Monitoring failed: {e}")           
 
-# -------- MAIN --------
 def main():
     if os.geteuid() != 0:
         print("[-] Run as root (sudo)")
